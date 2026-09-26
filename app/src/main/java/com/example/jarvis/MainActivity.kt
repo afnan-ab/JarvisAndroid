@@ -128,7 +128,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 startActivity(Intent(Settings.ACTION_SETTINGS)); say("Opening settings.")
             }
             command.contains("go home") -> {
-                val s = getSystemService(AccessibilityService::class.java)
+                
                 say("Use the enabled accessibility service for this command.")
             }
             command.contains("what can you do") -> say("I can open apps, control volume and flashlight, open settings, and use accessibility actions when enabled.")
