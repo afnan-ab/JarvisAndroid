@@ -450,8 +450,55 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 )
             }
 
+            openInstalledApp(c) -> Unit
+
             else -> askGroq(command)
         }
+    }
+
+    private fun openInstalledApp(command: String): Boolean {
+        val launchIntent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+
+        val apps = packageManager.queryIntentActivities(launchIntent, 0)
+
+        val cleaned = command
+            .lowercase(Locale.getDefault())
+            .replace(Regex("\\b(open|launch|start|khol|kholo|kholna|karo|do)\\b"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+
+        if (cleaned.isBlank()) return false
+
+        val matches = apps.mapNotNull { info ->
+            val label = info.loadLabel(packageManager).toString()
+            val normalized = label.lowercase(Locale.getDefault()).trim()
+
+            if (info.activityInfo.packageName == packageName) {
+                null
+            } else {
+                Triple(label, normalized, info.activityInfo.packageName)
+            }
+        }
+
+        val exact = matches.firstOrNull { it.second == cleaned }
+        val partial = matches.firstOrNull {
+            it.second.startsWith(cleaned) || cleaned.contains(it.second)
+        }
+
+        val match = exact ?: partial ?: return false
+
+        val intent = packageManager.getLaunchIntentForPackage(match.third)
+
+        if (intent != null) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            say("Opening ${match.first}.")
+            return true
+        }
+
+        return false
     }
 
     private fun prepareWhatsAppMessage(command: String) {
