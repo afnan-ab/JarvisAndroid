@@ -5,3 +5,5 @@ MainActivity.kt.before-action-engine
 MainActivity.kt.before-app-launcher
 MainActivity.kt.before-app-launcher~
 MainActivity.kt.before-generic-launcher
+JarvisAccessibilityService.kt.before-action-engine
+JarvisAccessibilityService.kt.before-action-engine
