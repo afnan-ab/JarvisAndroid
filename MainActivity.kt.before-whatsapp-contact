@@ -403,7 +403,21 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             (c.contains("message") ||
              c.contains("send") ||
              c.contains("msg")) -> {
-                prepareWhatsAppMessage(c)
+
+                val message = extractMessageText(c)
+
+                if (message.isBlank()) {
+                    say("What message should I prepare?")
+                } else {
+                    pendingAction = {
+                        openWhatsAppWithMessage(message)
+                    }
+
+                    say(
+                        "I will prepare this WhatsApp message: \"$message\". " +
+                        "Confirm?"
+                    )
+                }
             }
 
             c.contains("flashlight") ||
@@ -454,134 +468,40 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun prepareWhatsAppMessage(command: String) {
-        if (checkSelfPermission(android.Manifest.permission.READ_CONTACTS) !=
-            android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(
-                arrayOf(android.Manifest.permission.READ_CONTACTS),
-                1001
-            )
-
-            say("Please allow Contacts permission, then repeat the WhatsApp command.")
-            return
-        }
-
-        val contact = findContactFromCommand(command)
-
-        if (contact == null) {
-            say("I could not find that contact in your phone.")
-            return
-        }
-
-        val message = extractMessageAfterContact(command, contact.first)
-
-        if (message.isBlank()) {
-            say("What message should I prepare for ${contact.first}?")
-            return
-        }
-
-        val name = contact.first
-        val number = contact.second
-
-        pendingAction = {
-            openWhatsAppChat(number, message)
-        }
-
-        say(
-            "I found $name. I will open the WhatsApp chat with \"$message\". " +
-            "Confirm?"
-        )
-    }
-
-    private fun findContactFromCommand(command: String): Pair<String, String>? {
-        val projection = arrayOf(
-            android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-            android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER
+    private fun extractMessageText(command: String): String {
+        val patterns = listOf(
+            "message\\s+\\w+\\s+(.+)".toRegex(),
+            "msg\\s+\\w+\\s+(.+)".toRegex(),
+            "send\\s+\\w+\\s+(.+)".toRegex()
         )
 
-        val cursor = contentResolver.query(
-            android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-            projection,
-            null,
-            null,
-            null
-        ) ?: return null
-
-        var best: Pair<String, String>? = null
-
-        cursor.use {
-            while (it.moveToNext()) {
-                val name = it.getString(0) ?: continue
-                val number = it.getString(1) ?: continue
-
-                if (command.contains(name.lowercase(Locale.getDefault()))) {
-                    if (best == null || name.length > best!!.first.length) {
-                        best = Pair(name, number)
-                    }
-                }
+        for (pattern in patterns) {
+            val match = pattern.find(command)
+            if (match != null) {
+                return match.groupValues[1].trim()
             }
         }
 
-        return best
+        return ""
     }
 
-    private fun extractMessageAfterContact(
-        command: String,
-        contactName: String
-    ): String {
-        var text = command
-
-        listOf(
-            "open whatsapp",
-            "whatsapp",
-            "message",
-            "msg",
-            "send"
-        ).forEach {
-            text = text.replace(it, " ", ignoreCase = true)
-        }
-
-        text = text.replace(
-            contactName,
-            " ",
-            ignoreCase = true
-        )
-
-        return text
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
-
-    private fun openWhatsAppChat(number: String, message: String) {
+    private fun openWhatsAppWithMessage(message: String) {
         try {
-            val digits = number.filter { it.isDigit() }
-
-            if (digits.isBlank()) {
-                say("I could not read that contact's phone number.")
-                return
-            }
-
-            val encodedMessage =
-                java.net.URLEncoder.encode(message, "UTF-8")
-
-            val uri = android.net.Uri.parse(
-                "https://wa.me/$digits?text=$encodedMessage"
-            )
-
-            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, message)
                 setPackage("com.whatsapp")
             }
 
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
-                say("WhatsApp chat opened. Please press Send.")
+                say("WhatsApp opened. Choose the contact and press Send.")
             } else {
                 say("WhatsApp is not installed.")
             }
 
         } catch (e: Exception) {
-            say("I could not open that WhatsApp chat.")
+            say("I could not open WhatsApp.")
         }
     }
 
