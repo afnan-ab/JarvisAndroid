@@ -450,6 +450,73 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 )
             }
 
+            c == "back" ||
+            c == "go back" ||
+            c == "peeche jao" ||
+            c == "wapas jao" -> {
+                val service = JarvisAccessibilityService.instance
+                if (service?.goBack() == true) {
+                    say("Going back.")
+                } else {
+                    say("Accessibility service is not enabled.")
+                }
+            }
+
+            c == "home" ||
+            c == "go home" ||
+            c == "home jao" -> {
+                val service = JarvisAccessibilityService.instance
+                if (service?.goHome() == true) {
+                    say("Going home.")
+                } else {
+                    say("Accessibility service is not enabled.")
+                }
+            }
+
+            c.contains("scroll down") ||
+            c.contains("neeche scroll") ||
+            c.contains("scroll neeche") -> {
+                val service = JarvisAccessibilityService.instance
+                if (service?.scrollForward() == true) {
+                    say("Scrolling down.")
+                } else {
+                    say("I could not scroll this screen.")
+                }
+            }
+
+            c.contains("scroll up") ||
+            c.contains("upar scroll") ||
+            c.contains("scroll upar") -> {
+                val service = JarvisAccessibilityService.instance
+                if (service?.scrollBackward() == true) {
+                    say("Scrolling up.")
+                } else {
+                    say("I could not scroll this screen.")
+                }
+            }
+
+            c.startsWith("click ") ||
+            c.startsWith("tap ") ||
+            c.startsWith("press ") -> {
+                val target = c
+                    .removePrefix("click ")
+                    .removePrefix("tap ")
+                    .removePrefix("press ")
+                    .trim()
+
+                if (target.isBlank()) {
+                    say("Tell me what to click.")
+                } else {
+                    val service = JarvisAccessibilityService.instance
+
+                    if (service?.clickText(target) == true) {
+                        say("Done.")
+                    } else {
+                        say("I could not find that button or text.")
+                    }
+                }
+            }
+
             openInstalledApp(c) -> Unit
 
             else -> askGroq(command)
