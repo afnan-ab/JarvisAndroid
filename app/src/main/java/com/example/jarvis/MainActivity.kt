@@ -76,7 +76,35 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
         bg.addView(orb, LinearLayout.LayoutParams(-1, 220))
         bg.addView(status, LinearLayout.LayoutParams(-1, 70))
+        val input = EditText(this).apply {
+            hint = "Type a command..."
+            textSize = 17f
+            singleLine = true
+            setTextColor(0xFFE8F7FF.toInt())
+            setHintTextColor(0xFF78909C.toInt())
+            setPadding(20, 10, 20, 10)
+        }
+
+        val send = Button(this).apply {
+            text = "SEND"
+            setOnClickListener {
+                val command = input.text.toString().trim()
+                if (command.isNotEmpty()) {
+                    transcript.text = "You: $command"
+                    handleCommand(command)
+                    input.text.clear()
+                }
+            }
+        }
+
+        input.setOnEditorActionListener { _, _, _ ->
+            send.performClick()
+            true
+        }
+
         bg.addView(transcript, LinearLayout.LayoutParams(-1, 130))
+        bg.addView(input, LinearLayout.LayoutParams(-1, 65))
+        bg.addView(send, LinearLayout.LayoutParams(-1, 60))
         bg.addView(listen, LinearLayout.LayoutParams(-1, 60))
         bg.addView(access, LinearLayout.LayoutParams(-1, 60))
         setContentView(bg)
