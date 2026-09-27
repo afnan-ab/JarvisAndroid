@@ -2,3 +2,5 @@ local.properties
 .gradle/
 build/
 MainActivity.kt.before-action-engine
+MainActivity.kt.before-app-launcher
+MainActivity.kt.before-app-launcher~
