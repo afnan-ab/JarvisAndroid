@@ -517,6 +517,31 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
                 }
             }
 
+            c.startsWith("type ") ||
+            c.startsWith("enter ") ||
+            c.startsWith("write ") ||
+            c.startsWith("search ") -> {
+
+                val text = c
+                    .removePrefix("type ")
+                    .removePrefix("enter ")
+                    .removePrefix("write ")
+                    .removePrefix("search ")
+                    .trim()
+
+                if (text.isBlank()) {
+                    say("Tell me what to type.")
+                } else {
+                    val service = JarvisAccessibilityService.instance
+
+                    if (service?.setText(text) == true) {
+                        say("Text entered.")
+                    } else {
+                        say("I could not find an editable text field.")
+                    }
+                }
+            }
+
             openInstalledApp(c) -> Unit
 
             else -> askGroq(command)
