@@ -376,50 +376,10 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         override fun onEvent(eventType: Int, params: Bundle?) {}
     }
 
-    private var pendingAction: (() -> Unit)? = null
-
     private fun handleCommand(command: String) {
         val c = command.lowercase(Locale.getDefault()).trim()
 
         when {
-            pendingAction != null &&
-            (c == "yes" || c == "yeah" || c == "yep" ||
-             c == "haan" || c == "ha" || c == "confirm" ||
-             c == "do it" || c == "okay" || c == "ok") -> {
-                val action = pendingAction
-                pendingAction = null
-                say("Confirmed.")
-                action?.invoke()
-            }
-
-            pendingAction != null &&
-            (c == "no" || c == "nope" || c == "nahi" ||
-             c == "cancel" || c == "stop") -> {
-                pendingAction = null
-                say("Cancelled.")
-            }
-
-            c.contains("whatsapp") &&
-            (c.contains("message") ||
-             c.contains("send") ||
-             c.contains("msg")) -> {
-
-                val message = extractMessageText(c)
-
-                if (message.isBlank()) {
-                    say("What message should I prepare?")
-                } else {
-                    pendingAction = {
-                        openWhatsAppWithMessage(message)
-                    }
-
-                    say(
-                        "I will prepare this WhatsApp message: \"$message\". " +
-                        "Confirm?"
-                    )
-                }
-            }
-
             c.contains("flashlight") ||
             c.contains("torch") ||
             c.contains("flash on") ||
@@ -465,43 +425,6 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             }
 
             else -> askGroq(command)
-        }
-    }
-
-    private fun extractMessageText(command: String): String {
-        val patterns = listOf(
-            "message\\s+\\w+\\s+(.+)".toRegex(),
-            "msg\\s+\\w+\\s+(.+)".toRegex(),
-            "send\\s+\\w+\\s+(.+)".toRegex()
-        )
-
-        for (pattern in patterns) {
-            val match = pattern.find(command)
-            if (match != null) {
-                return match.groupValues[1].trim()
-            }
-        }
-
-        return ""
-    }
-
-    private fun openWhatsAppWithMessage(message: String) {
-        try {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, message)
-                setPackage("com.whatsapp")
-            }
-
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-                say("WhatsApp opened. Choose the contact and press Send.")
-            } else {
-                say("WhatsApp is not installed.")
-            }
-
-        } catch (e: Exception) {
-            say("I could not open WhatsApp.")
         }
     }
 
