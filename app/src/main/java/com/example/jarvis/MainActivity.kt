@@ -714,7 +714,17 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
 
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
-                say("WhatsApp chat opened. Please press Send.")
+                say("Opening WhatsApp.")
+
+                android.os.Handler(mainLooper).postDelayed({
+                    val service = JarvisAccessibilityService.instance
+
+                    if (service?.clickSendButton() == true) {
+                        say("Message sent.")
+                    } else {
+                        say("I could not find the Send button.")
+                    }
+                }, 1500)
             } else {
                 say("WhatsApp is not installed.")
             }
