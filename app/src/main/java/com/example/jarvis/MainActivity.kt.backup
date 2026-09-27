@@ -118,47 +118,21 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
     }
 
     private fun handleCommand(command: String) {
-        val c = command.lowercase(Locale.getDefault()).trim()
-
         when {
-            c.contains("flashlight") || c.contains("torch") ||
-            c.contains("flash on") || c.contains("flash off") ||
-            c.contains("फ्लैशलाइट") -> toggleFlash()
-
-            c.contains("volume up") || c.contains("increase volume") ||
-            c.contains("volume badhao") || c.contains("awaz badhao") ||
-            c.contains("volume down") || c.contains("decrease volume") ||
-            c.contains("volume kam") || c.contains("awaz kam") -> {
-                volume(
-                    c.contains("up") || c.contains("increase") ||
-                    c.contains("badhao")
-                )
+            command.contains("flashlight") || command.contains("torch") -> toggleFlash()
+            command.contains("volume up") || command.contains("increase volume") -> volume(true)
+            command.contains("volume down") || command.contains("decrease volume") -> volume(false)
+            command.contains("open youtube") -> openPackage("com.google.android.youtube", "YouTube")
+            command.contains("open chrome") -> openPackage("com.android.chrome", "Chrome")
+            command.contains("open settings") -> {
+                startActivity(Intent(Settings.ACTION_SETTINGS)); say("Opening settings.")
             }
-
-            c.contains("open youtube") || c.contains("youtube kholo") ||
-            c.contains("youtube open") -> {
-                openPackage("com.google.android.youtube", "YouTube")
+            command.contains("go home") -> {
+                
+                say("Use the enabled accessibility service for this command.")
             }
-
-            c.contains("open chrome") || c.contains("chrome kholo") ||
-            c.contains("chrome open") -> {
-                openPackage("com.android.chrome", "Chrome")
-            }
-
-            c.contains("open settings") || c.contains("settings kholo") ||
-            c.contains("settings open") -> {
-                startActivity(Intent(Settings.ACTION_SETTINGS))
-                say("Opening settings.")
-            }
-
-            c.contains("what can you do") || c.contains("tum kya kar sakte ho") ||
-            c.contains("what can you") -> {
-                say("I can control supported phone functions, open apps, control volume and flashlight, and respond to voice commands.")
-            }
-
-            else -> {
-                say("I heard you, but I don't have an action for that command yet.")
-            }
+            command.contains("what can you do") -> say("I can open apps, control volume and flashlight, open settings, and use accessibility actions when enabled.")
+            else -> say("I heard you. I don't have a safe built-in action for that command yet.")
         }
     }
 
