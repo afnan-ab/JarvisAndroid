@@ -654,7 +654,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             // Rotating rings.
             paint.shader = null
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = dp(2)
+            paint.strokeWidth = dp(2).toFloat()
             paint.color = Color.argb(180, 0, 220, 255)
 
             canvas.save()
