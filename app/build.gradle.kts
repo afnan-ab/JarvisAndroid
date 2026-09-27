@@ -4,10 +4,15 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     namespace = "com.example.jarvis"
     compileSdk = 36
 
     defaultConfig {
+        val groqKey = project.findProperty("GROQ_API_KEY")?.toString() ?: ""
+        buildConfigField("String", "GROQ_API_KEY", ""$groqKey"")
         applicationId = "com.example.jarvis"
         minSdk = 26
         targetSdk = 35
