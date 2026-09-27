@@ -4,3 +4,4 @@ build/
 MainActivity.kt.before-action-engine
 MainActivity.kt.before-app-launcher
 MainActivity.kt.before-app-launcher~
+MainActivity.kt.before-generic-launcher
