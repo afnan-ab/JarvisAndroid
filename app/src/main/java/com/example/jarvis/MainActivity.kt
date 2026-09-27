@@ -79,7 +79,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         val input = EditText(this).apply {
             hint = "Type a command..."
             textSize = 17f
-            singleLine = true
+            setSingleLine(true)
             setTextColor(0xFFE8F7FF.toInt())
             setHintTextColor(0xFF78909C.toInt())
             setPadding(20, 10, 20, 10)
